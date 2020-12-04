@@ -1,5 +1,5 @@
 #insira seu código aqui
-# USAR TECLA a PARA PASSAR IMAGEM
+# Usar a tecla 'q' para mostrar todas as imagens antes de mostrar os calculos no terminal
 
 import numpy as np
 import cv2
@@ -9,9 +9,9 @@ def main():
     # Load the image
     img = imgLoadBgr("S1.jpg")
     img2 = imgLoadBgr("S2.jpg")
-    img3 = imgLoad("D1.jpg")
-    img4 = imgLoad("D2.jpg")
-    img5 = imgLoad("D3.jpg")
+    img3 = imgLoadBgr("D1.jpg")
+    img4 = imgLoadBgr("D2.jpg")
+    img5 = imgLoadBgr("D3.jpg")
 
     images = [img, img2, img3, img4, img5]
     imgTitles = ["S1", "S2", "D1", "D2", "D3"]
@@ -20,7 +20,6 @@ def main():
     imagesGray = images.copy()
 
     index = 0
-    maxIndex = len(images) - 1
 
     # Converting images to hsv and grey
     for i in range(len(images)):
@@ -28,51 +27,44 @@ def main():
         imagesGray[i] = cv2.cvtColor(imagesGray[i], cv2.COLOR_RGB2GRAY)
 
     distances = imgCompare(imagesHsv)
-    min = 10000
+    min = 1000000
     index_title = 0
 
-    for i in range(1, maxIndex):
-        if distances[i] < min:
+    for i in range(1, len(distances)):
+        distances[i] = int(distances[i])
+        if int(distances[i]) < min:
+            print(distances[i])
             min = distances[i]
             index_title = i
-
 
     print("The distance from the first image is:")
     for image in range(len(images)):
         print("Image ", image, " Distance to first = ", distances[image])
 
-    print("The image that matches the most is:", "\nImage: ", imgTitles[index_title], "\nDistance: ", min)
+    print("\nThe image that matches the most is Image: ", imgTitles[index_title], "\nDistance: ", min)
 
-    while True:
+    winTitle = "Imagem 1"
+    cv2.namedWindow(winTitle)
+    cv2.moveWindow(winTitle, 300, 100)
 
-        # Destroy a janela anterior
-        if index == 0:
-            cv2.destroyWindow(imgTitles[maxIndex])
-        else:
-            cv2.destroyWindow(imgTitles[index - 1])
+    cv2.imshow(winTitle, images[0])
+    cv2.waitKey(0)
 
-        # Cria as janelas
-        winTitle = imgTitles[index]
-        cv2.namedWindow(winTitle)
-        cv2.moveWindow(winTitle, 300, 100)  # Move it to (40,30)
+    winTitle = "Imagem 2"
+    cv2.imshow(winTitle, images[1])
+    cv2.waitKey(0)
 
-        # Imagem sendo exibida
-        panel = images[index]
+    winTitle = "Imagem 3"
+    cv2.imshow(winTitle, images[2])
+    cv2.waitKey(0)
 
-        # Press the 'd' key, Next image
-        if cv2.waitKey(1) & 0xFF == ord('d'):
-            # Increment the index
-            if index == maxIndex:
-                index = 0
-            else:
-                index += 1
-            print("Image: ", imgTitles[index])
+    winTitle = "Imagem 4"
+    cv2.imshow(winTitle, images[3])
+    cv2.waitKey(0)
 
-        # Show the image
-        cv2.imshow(winTitle, panel)
-
-        # Se tecla 'esc' ou tecla 'q' for pressionada, fecha a aplicação
-        if cv2.waitKey(1) & 0xFF == ord('q') or cv2.waitKey(1) & 0xFF == 27: break
+    winTitle = "Imagem 5"
+    cv2.imshow(winTitle, images[4])
+    cv2.waitKey(0)
 
     cv2.destroyAllWindows()
 
@@ -110,7 +102,7 @@ def imgCompare(imageList):
         chiSquare = cv2.compareHist(histogram_input, histo, 1)
         bhatta = cv2.compareHist(histogram_input, histo, 3)
 
-        correlation = pow(correlation, 2)
+        correlation = pow((1/(correlation + 0.001)), 2)
         chiSquare = pow(chiSquare, 2)
         bhatta = pow(bhatta, 2)
 
